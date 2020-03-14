@@ -57,6 +57,12 @@ contract FlipperMom {
         owner = owner_;
     }
 
+    event SetAuthority(address oldAuthority, address newAuthority);
+    function setAuthority(address authority_) external onlyOwner {
+        emit SetAuthority(authority, authority_);
+        authority = authority_;
+    }
+
     // Should this remain delayed to guard against malicious governance?
     event Rely(address flip, address usr);
     function rely(address flip, address usr) external auth {
