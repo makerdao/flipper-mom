@@ -19,12 +19,12 @@ contract MomCaller {
         mom.setAuthority(newAuthority);
     }
 
-    function deny(address flip, address usr) public {
-        mom.deny(flip, usr);
+    function deny(address flip) public {
+        mom.deny(flip);
     }
 
-    function rely(address flip, address usr) public {
-        mom.rely(flip, usr);
+    function rely(address flip) public {
+        mom.rely(flip);
     }
 }
 
@@ -64,13 +64,13 @@ contract FlipperMomTest is DSTest {
     address cat;
 
     function setUp() public {
-        mom = new FlipperMom();
+        cat = address(new Cat());
+        mom = new FlipperMom(cat);
         caller = new MomCaller(mom);
         authority = new SimpleAuthority(address(caller));
         mom.setAuthority(address(authority));
         flip = new Flipper();
         flip.rely(address(mom));
-        cat = address(new Cat());
         flip.rely(cat);
     }
 
@@ -102,83 +102,76 @@ contract FlipperMomTest is DSTest {
 
     function testDenyViaAuth() public {
         assertEq(flip.wards(cat), 1);
-        caller.deny(address(flip), cat);
+        caller.deny(address(flip));
         assertEq(flip.wards(cat), 0);
     }
 
     function testDenyViaOwner() public {
         mom.setAuthority(address(0));
         assertEq(flip.wards(cat), 1);
-        mom.deny(address(flip), cat);
+        mom.deny(address(flip));
         assertEq(flip.wards(cat), 0);
-    }
-
-    function testFailCannotDenyIfNotRelied() public {
-        flip.deny(cat);
-        caller.deny(address(flip), cat);
     }
 
     function testFailDenyNoAuthority() public {
         mom.setAuthority(address(0));
         assertTrue(mom.owner() != address(caller));
-        caller.deny(address(flip), cat);
+        caller.deny(address(flip));
         assertEq(flip.wards(cat), 0);
     }
 
     function testFailDenyUnauthorized() public {
         mom.setAuthority(address(new SimpleAuthority(address(this))));
         assertTrue(mom.owner() != address(caller));
-        caller.deny(address(flip), cat);
+        caller.deny(address(flip));
     }
 
     function testRelyViaAuth() public {
-        caller.deny(address(flip), cat);
-        caller.rely(address(flip), cat);
+        flip.deny(cat);
+        caller.rely(address(flip));
         assertEq(flip.wards(cat), 1);
     }
 
-    function testFailRelyNotDenied() public {
-        caller.rely(address(flip), cat);
+    function testRelyNotDenied() public {
+        caller.rely(address(flip));
         assertEq(flip.wards(cat), 1);
     }
 
     function testRelyViaOwner() public {
-        caller.deny(address(flip), cat);
+        flip.deny(cat);
         mom.setAuthority(address(0));
-        assertEq(flip.wards(cat), 0);
-        mom.rely(address(flip), cat);
+        mom.rely(address(flip));
         assertEq(flip.wards(cat), 1);
     }
 
     function testFailRelyNoAuthority() public {
-        caller.deny(address(flip), cat);
+        flip.deny(cat);
         mom.setAuthority(address(0));
         assertTrue(mom.owner() != address(caller));
-        caller.rely(address(flip), cat);
-        assertEq(flip.wards(cat), 0);
+        caller.rely(address(flip));
     }
 
     function testFailRelyUnauthorized() public {
-        caller.deny(address(flip), cat);
+        flip.deny(cat);
         mom.setAuthority(address(new SimpleAuthority(address(this))));
         assertTrue(mom.owner() != address(caller));
-        caller.rely(address(flip), cat);
+        caller.rely(address(flip));
     }
 
     function testDenyRelyDeny() public {
-        caller.deny(address(flip), cat);
-        caller.rely(address(flip), cat);
-        caller.deny(address(flip), cat);
+        caller.deny(address(flip));
+        caller.rely(address(flip));
+        caller.deny(address(flip));
     }
 
-    function testFailDenyDeny() public {
-        caller.deny(address(flip), cat);
-        caller.deny(address(flip), cat);
+    function testDenyDeny() public {
+        caller.deny(address(flip));
+        caller.deny(address(flip));
     }
 
-    function testFailRelyRely() public {
-        caller.deny(address(flip), cat);
-        caller.rely(address(flip), cat);
-        caller.rely(address(flip), cat);
+    function testRelyRely() public {
+        caller.deny(address(flip));
+        caller.rely(address(flip));
+        caller.rely(address(flip));
     }
 }
