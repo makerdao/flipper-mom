@@ -49,7 +49,7 @@ contract FlipperMom {
     }
 
     // only this contract can be denied/relied
-    address cat;
+    address public cat;
 
     //  time of last deny
     uint denied;
