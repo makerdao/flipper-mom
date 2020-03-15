@@ -164,4 +164,10 @@ contract FlipperMomTest is DSTest {
         assertTrue(mom.owner() != address(caller));
         caller.rely(address(flip), cat);
     }
+
+    function testDenyRelyDeny() public {
+        caller.deny(address(flip), cat);
+        caller.rely(address(flip), cat);
+        caller.deny(address(flip), cat);
+    }
 }
