@@ -18,6 +18,7 @@
 pragma solidity 0.5.15;
 
 contract FlipLike {
+    function wards(address) public returns (uint);
     function rely(address) external;
     function deny(address) external;
 }
@@ -47,6 +48,11 @@ contract FlipperMom {
         }
     }
 
+    //  first address: MCD contract
+    // second address: denied address
+    //  value of uint: 1 if denial occurred previously, 0 otherwise
+    mapping (address => mapping (address => uint)) denied;
+
     constructor() public {
         owner = msg.sender;
     }
@@ -63,16 +69,19 @@ contract FlipperMom {
         authority = authority_;
     }
 
-    // Should this remain delayed to guard against malicious governance?
     event Rely(address flip, address usr);
     function rely(address flip, address usr) external auth {
         emit Rely(flip, usr);
+        require(denied[flip][usr] == 1, "flipper-mom/cannot-rely-undenied-address");
         FlipLike(flip).rely(usr);
+        denied[flip][usr] = 0;
     }
 
     event Deny(address flip, address usr);
     function deny(address flip, address usr) external auth {
         emit Deny(flip, usr);
+        require(FlipLike(flip).wards(usr) == 1, "flipper-mom/cannot-deny-unrelied-address");
         FlipLike(flip).deny(usr);
+        denied[flip][usr] = 1;
     }
 }
