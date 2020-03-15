@@ -27,7 +27,7 @@ contract AuthorityLike {
     function canCall(address src, address dst, bytes4 sig) public view returns (bool);
 }
 
-contract FlipperMom {
+contract DelayingFlipperMom {
     address public owner;
     modifier onlyOwner { require(msg.sender == owner, "flipper-mom/only-owner"); _;}
 
