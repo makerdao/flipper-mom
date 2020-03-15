@@ -48,10 +48,11 @@ contract FlipperMom {
         }
     }
 
-    //  first address: MCD contract
-    // second address: denied address
-    //  value of uint: timestamp at which the deny occurred
-    mapping (address => mapping (address => uint)) denied;
+    // only this contract can be denied/relied
+    address cat;
+
+    //  time of last deny
+    uint denied;
 
     // how long to wait before allowing re-relying
     uint public delay;
@@ -61,8 +62,9 @@ contract FlipperMom {
         require((z = x + y) >= x);
     }
 
-    constructor() public {
+    constructor(address cat_) public {
         owner = msg.sender;
+        cat = cat_;
     }
 
     event SetOwner(address oldOwner, address newOwner);
@@ -84,18 +86,18 @@ contract FlipperMom {
     }
 
     event Rely(address flip, address usr);
-    function rely(address flip, address usr) external auth {
-        emit Rely(flip, usr);
-        require(add(denied[flip][usr], delay) >= now, "flipper-mom/cannot-rely");
-        FlipLike(flip).rely(usr);
-        denied[flip][usr] = 0;
+    function rely(address flip) external auth {
+        emit Rely(flip, cat);
+        require(add(denied, delay) >= now, "flipper-mom/cannot-rely");
+        FlipLike(flip).rely(cat);
+        denied = 0;
     }
 
     event Deny(address flip, address usr);
-    function deny(address flip, address usr) external auth {
-        emit Deny(flip, usr);
-        require(FlipLike(flip).wards(usr) == 1, "flipper-mom/cannot-deny-unrelied-address");
-        FlipLike(flip).deny(usr);
-        denied[flip][usr] = now;
+    function deny(address flip) external auth {
+        emit Deny(flip, cat);
+        require(denied == 0, "flipper-mom/cannot-deny"); // prevent extension
+        FlipLike(flip).deny(cat);
+        denied = now;
     }
 }
