@@ -113,6 +113,11 @@ contract FlipperMomTest is DSTest {
         assertEq(flip.wards(cat), 0);
     }
 
+    function testFailCannotDenyIfNotRelied() public {
+        flip.deny(cat);
+        caller.deny(address(flip), cat);
+    }
+
     function testFailDenyNoAuthority() public {
         mom.setAuthority(address(0));
         assertTrue(mom.owner() != address(caller));
@@ -127,14 +132,18 @@ contract FlipperMomTest is DSTest {
     }
 
     function testRelyViaAuth() public {
-        flip.deny(cat);
-        assertEq(flip.wards(cat), 0);
+        caller.deny(address(flip), cat);
+        caller.rely(address(flip), cat);
+        assertEq(flip.wards(cat), 1);
+    }
+
+    function testFailRelyNotDenied() public {
         caller.rely(address(flip), cat);
         assertEq(flip.wards(cat), 1);
     }
 
     function testRelyViaOwner() public {
-        flip.deny(cat);
+        caller.deny(address(flip), cat);
         mom.setAuthority(address(0));
         assertEq(flip.wards(cat), 0);
         mom.rely(address(flip), cat);
@@ -142,6 +151,7 @@ contract FlipperMomTest is DSTest {
     }
 
     function testFailRelyNoAuthority() public {
+        caller.deny(address(flip), cat);
         mom.setAuthority(address(0));
         assertTrue(mom.owner() != address(caller));
         caller.rely(address(flip), cat);
@@ -149,6 +159,7 @@ contract FlipperMomTest is DSTest {
     }
 
     function testFailRelyUnauthorized() public {
+        caller.deny(address(flip), cat);
         mom.setAuthority(address(new SimpleAuthority(address(this))));
         assertTrue(mom.owner() != address(caller));
         caller.rely(address(flip), cat);
