@@ -170,4 +170,15 @@ contract FlipperMomTest is DSTest {
         caller.rely(address(flip), cat);
         caller.deny(address(flip), cat);
     }
+
+    function testFailDenyDeny() public {
+        caller.deny(address(flip), cat);
+        caller.deny(address(flip), cat);
+    }
+
+    function testFailRelyRely() public {
+        caller.deny(address(flip), cat);
+        caller.rely(address(flip), cat);
+        caller.rely(address(flip), cat);
+    }
 }
