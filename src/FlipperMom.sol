@@ -49,7 +49,7 @@ contract FlipperMom {
     }
 
     // only this contract can be denied/relied
-    address cat;
+    address public cat;
 
     constructor(address cat_) public {
         owner = msg.sender;
