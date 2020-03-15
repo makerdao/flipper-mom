@@ -32,7 +32,7 @@ contract FlipperMom {
 
     address public authority;
     modifier auth {
-        require(isAuthorized(msg.sender, msg.sig), "osm-mom/not-authorized");
+        require(isAuthorized(msg.sender, msg.sig), "flipper-mom/not-authorized");
         _;
     }
     function isAuthorized(address src, bytes4 sig) internal view returns (bool) {
