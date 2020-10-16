@@ -15,16 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-pragma solidity ^0.5.12;
+pragma solidity >=0.5.12;
 
-contract FlipLike {
-    function wards(address) public returns (uint);
+interface FlipLike {
+    function wards(address) external returns (uint);
     function rely(address) external;
     function deny(address) external;
 }
 
-contract AuthorityLike {
-    function canCall(address src, address dst, bytes4 sig) public view returns (bool);
+interface AuthorityLike {
+    function canCall(address src, address dst, bytes4 sig) external view returns (bool);
 }
 
 contract DelayingFlipperMom {
